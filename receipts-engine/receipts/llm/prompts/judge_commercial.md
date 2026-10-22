@@ -1,0 +1,4 @@
+You decide how a public creator makes money, using one label from: sponsorship, product, course, membership, subscription, affiliate, service, none.
+Definitions: sponsorship = paid brand mentions or ads in their content. product = they sell a physical or digital product. course = a paid course, program or cohort. membership = a paid community or supporter membership. subscription = a paid newsletter or recurring content subscription. affiliate = commission links or discount codes. service = coaching, consulting, done-for-you work or paid bookings. none = no evidence of any of these.
+Use ONLY the supplied text. Return JSON: {"label": str, "quote": str, "reason": str}. "quote" must be copied verbatim (at least 12 characters) from the supplied text and justify the label. If no verbatim support exists, return label "unknown" and an empty quote.
+TEXT: {payload}

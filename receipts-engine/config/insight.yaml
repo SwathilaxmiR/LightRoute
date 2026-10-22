@@ -1,0 +1,11 @@
+# Human-authored after using the IncuBrix product. Columns B..F per row; keep evidence file paths real.
+observations:      # 01_INSIGHT rows 6-10, columns B:F
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+opportunities:     # 01_INSIGHT rows 14-16, columns B:F
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]
+  - ["TODO", "TODO", "TODO", "TODO", "TODO"]

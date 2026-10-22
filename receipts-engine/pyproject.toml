@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "receipts-engine"
+version = "1.0.0"
+description = "Multi-channel creator lead generation engine with verifiable receipts"
+requires-python = ">=3.11"
+dependencies = [
+  "typer==0.27.3",
+  "httpx==0.28.1",
+  "tenacity==9.2.1",
+  "pydantic==2.14.1",
+  "pyyaml==6.0.3",
+  "python-dotenv==1.2.4",
+  "feedparser==6.0.14",
+  "selectolax==1.0.1",
+  "trafilatura==2.3.1",
+  "tldextract==5.4.0",
+  "rapidfuzz==3.14.6",
+  "lingua-language-detector==2.1.1",
+  "dnspython==2.9.0",
+  "jinja2==3.1.6",
+  "openpyxl==3.1.5",
+  "anthropic==2.0.0",
+  "fastapi==0.157.0",
+  "uvicorn==0.54.0",
+  "apscheduler==3.11.3",
+  "rich==15.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1", "pytest-asyncio==1.4.0", "respx==0.23.1", "ruff==0.17.1", "freezegun==1.5.5"]
+
+[project.scripts]
+receipts = "receipts.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["receipts*"]
+
+[tool.setuptools.package-data]
+receipts = ["llm/prompts/*.md", "outreach/templates/**/*.j2", "web/templates/*.html", "web/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = [".venv", "out"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B008"]

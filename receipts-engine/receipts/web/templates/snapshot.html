@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% set active = "leads" %}
+{% block title %}Snapshot {{ snap.snap_id }} · Receipts console{% endblock %}
+{% block body %}
+<h1>Snapshot {{ snap.snap_id }}</h1>
+<p class="sub url"><a href="{{ snap.url }}" target="_blank" rel="noopener noreferrer">{{ snap.url }}</a></p>
+<div class="grid kpis">
+  <div class="card kpi"><div class="label">Fetched</div><div class="value" style="font-size:16px">{{ snap.fetched_at|ts }}</div></div>
+  <div class="card kpi"><div class="label">Status</div><div class="value" style="font-size:16px">{{ snap.status_code }}</div><div class="hint">{{ snap.content_type }}</div></div>
+  <div class="card kpi"><div class="label">Origin</div><div class="value" style="font-size:16px"><span class="badge {{ 'b-pass' if snap.data_origin == 'live' else 'b-warn' }}">{{ snap.data_origin }}</span></div></div>
+  <div class="card kpi"><div class="label">SHA-256</div><div class="mono" style="word-break:break-all;font-size:12px;margin-top:6px">{{ snap.sha256 }}</div></div>
+</div>
+{% if q %}<p style="margin-top:14px"><span class="badge {{ 'b-pass' if found else 'b-fail' }}">{{ 'Quote found' if found else 'Quote not found verbatim' }}</span> <span class="muted">{{ q }}</span></p>{% endif %}
+<h2>Text the receipts were verified against <span class="muted" style="font-weight:400">· {{ '{:,}'.format(size) }} characters, shown as plain text</span></h2>
+<pre class="snap">{{ body }}</pre>
+{% if used_by %}<h2>Receipts citing this snapshot</h2>
+<ul class="list">{% for u in used_by %}<li><span class="badge b-neutral">{{ u.check_name }}</span><span class="grow">{{ u.sub_key }}</span>{% if u.lead_id %}<a href="/leads/{{ u.lead_id }}">{{ u.lead_id }}</a>{% endif %}</li>{% endfor %}</ul>{% endif %}
+{% endblock %}

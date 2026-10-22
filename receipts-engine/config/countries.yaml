@@ -1,0 +1,24 @@
+approved: [US, CA, GB, IE, AU, NZ, SG]
+cctld:
+  CA: [".ca"]
+  GB: [".uk", ".co.uk"]
+  IE: [".ie"]
+  AU: [".au", ".com.au"]
+  NZ: [".nz", ".co.nz"]
+  SG: [".sg", ".com.sg"]
+  US: []                                   # .com is neutral, not a US signal
+names:                                     # text signals "based in <X>"
+  US: ["united states", "usa", "u.s.", "new york", "los angeles", "austin", "chicago", "california", "texas", "florida"]
+  CA: ["canada", "toronto", "vancouver", "montreal", "calgary"]
+  GB: ["united kingdom", "uk", "england", "london", "manchester", "scotland"]
+  IE: ["ireland", "dublin", "cork"]
+  AU: ["australia", "sydney", "melbourne", "brisbane", "perth"]
+  NZ: ["new zealand", "auckland", "wellington"]
+  SG: ["singapore"]
+postal_patterns:
+  US: '\b[A-Z]{2}\s\d{5}(-\d{4})?\b'
+  CA: '\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b'
+  GB: '\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b'
+  AU: '\b(NSW|VIC|QLD|TAS|ACT)\s\d{4}\b'      # adjusted: spec's '\d{4}.*STATE' matched any year + later state word; WA/SA/NT dropped (common words)
+generic_cctlds: [io, co, ai, tv, me, fm, ly, gg, cc, to, so, is, it, app, xyz]   # used worldwide; not a country signal
+rule: "accept only if declared_country agrees with at least one corroborating signal from cctld, names, postal_patterns, or schema.org addressCountry"

@@ -1,0 +1,11 @@
+.env
+out/
+state.db
+state.db-*
+__pycache__/
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+tests/fixtures/synthetic/
+out/

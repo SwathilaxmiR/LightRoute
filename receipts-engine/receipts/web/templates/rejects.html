@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% set active = "rejects" %}
+{% block title %}Rejects · Receipts console{% endblock %}
+{% block body %}
+<h1>Rejects</h1>
+<p class="sub">Every candidate that did not qualify, with the stage and reason code. These never reach leads.csv.</p>
+<div style="margin-bottom:14px">
+  <a class="badge {{ 'b-A' if not reason else 'b-neutral' }}" href="/rejects">All {{ reasons|sum(attribute='n') }}</a>
+  {% for r in reasons %}<a class="badge {{ 'b-A' if reason == r.reject_reason else 'b-neutral' }}" style="margin:0 6px 6px 0" href="/rejects?reason={{ r.reject_reason|urlencode }}">{{ r.reject_reason }} {{ r.n }}</a>{% endfor %}
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Ref</th><th>Platform</th><th>Source</th><th>Stage</th><th>Reason</th><th>Detail</th><th>Rejected (UTC)</th></tr></thead>
+<tbody>
+{% for r in rows %}<tr><td class="mono">C{{ '%05d'|format(r.cand_id) }}</td><td>{{ r.platform }}</td>
+<td class="url">{% if r.url.startswith('http') %}<a href="{{ r.url }}" target="_blank" rel="noopener noreferrer">{{ r.source_id }}</a>{% else %}{{ r.url }}{% endif %}</td>
+<td>{{ r.stage }}</td><td><span class="badge b-fail">{{ r.reject_reason }}</span></td><td class="muted">{{ r.reject_detail or '' }}</td><td>{{ r.rejected_at|ts }}</td></tr>
+{% else %}<tr><td colspan="7" class="empty">No rejected candidates.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if pages > 1 %}<div class="pager">
+{% if page > 1 %}<a class="btn" href="/rejects?reason={{ reason|urlencode }}&page={{ page - 1 }}">Previous</a>{% endif %}
+<span>Page {{ page }} of {{ pages }} · {{ total }} rows</span>
+{% if page < pages %}<a class="btn" href="/rejects?reason={{ reason|urlencode }}&page={{ page + 1 }}">Next</a>{% endif %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "_base.html.j2" %}
+{% block title %}{{ row.lead_id }} {{ row.creator_name }}{% endblock %}
+{% block body %}
+<h1>{{ row.lead_id }} · {{ row.creator_name }}</h1>
+<p class="muted">{{ row.creator_segment }} · {{ row.country_iso2 }} · {{ row.primary_platform }} · score {{ row.lead_score }} · Priority {{ row.priority }} · <a href="{{ row.profile_url }}">profile</a></p>
+<h2>Seven checks</h2>
+{% for c in cards %}
+<div class="card"><h3>{{ loop.index }}. {{ c.title }} <span class="{{ 'pass' if c.result == 'pass' else 'fail' }}">{{ c.result|upper }}</span></h3>
+{% for e in c.entries %}
+<div style="margin:8px 0">
+{% if e.sub_key %}<b>{{ e.sub_key }}</b> · {% endif %}{% if e.evidence_url %}<a href="{{ e.evidence_url }}">{{ e.evidence_url }}</a>{% endif %}
+<div class="quote">{{ e.quote_or_metric or '' }}</div>
+<div class="muted">checked {{ e.checked_at }} · {{ e.verified_by }}{% if e.snapshot_rel %} · <a href="{{ e.snapshot_rel }}">snapshot</a>{% endif %}{% if e.reason_code %} · {{ e.reason_code }}{% endif %}</div>
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+<h2>Score</h2>
+<div class="card"><table>{% for k, v in score.components.items() %}<tr><td>{{ k }}</td><td>{{ '%.2f'|format(v) }}</td><td>weight {{ weights[k] }}</td></tr>{% endfor %}
+<tr><td><b>total</b></td><td><b>{{ score.total }}</b></td><td></td></tr></table></div>
+<h2>Channels</h2>
+{% for role, ch in channels.items() %}
+<div class="card"><h3>{{ role }}: {{ ch.channel_type }} → {{ ch.handle_or_url }}</h3>
+<div>found on <a href="{{ ch.source_url }}">{{ ch.source_url }}</a></div><div class="quote">{{ ch.source_quote }}</div>
+<div class="muted">verified={{ ch.verified }} · business wording={{ ch.business_language }} · live={{ ch.live_ok }} · name match={{ ch.name_match }} · MX={{ ch.mx_ok }} · active {{ ch.last_active }} ({{ ch.active_proof }}){% if ch.assisted_send %} · assisted send{% endif %}</div></div>
+{% endfor %}
+<h2>Messages</h2>
+{% for m in messages %}
+<div class="card"><h3>{{ m.channel }} step {{ m.step }} {% if m.validated %}<span class="pass">VALID</span>{% else %}<span class="fail">INVALID</span>{% endif %}</h3>
+{% if m.subject %}<div><b>Subject:</b> {{ m.subject }}</div>{% endif %}<pre>{{ m.body }}</pre><div class="muted">hook source: <a href="{{ m.hook_source_url }}">{{ m.hook_source_url }}</a></div></div>
+{% endfor %}
+{% endblock %}

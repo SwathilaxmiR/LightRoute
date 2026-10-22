@@ -1,0 +1,10 @@
+course_or_product: [kajabi.com, teachable.com, thinkific.com, podia.com, gumroad.com, skool.com, circle.so, mightynetworks.com, stan.store, kartra.com, samcart.com, udemy.com]
+membership_or_subscription: [patreon.com, memberful.com, supercast.com, substack.com, buymeacoffee.com, ko-fi.com]
+services_or_booking: [calendly.com, cal.com, tidycal.com, acuityscheduling.com, savvycal.com]
+sponsor_phrases: ["sponsored by", "brought to you by", "this episode is sponsored", "use code", "promo code", "paid partnership", "#ad", "#sponsored", "affiliate link", "affiliate disclosure", "i earn a commission"]
+sponsor_page_phrases: ["sponsor", "advertise", "media kit", "partnerships", "work with me", "work with us"]
+# added: phrases that mean affiliate income rather than a paid sponsorship (sponsorship = sponsor_phrases minus these)
+affiliate_phrases: ["use code", "promo code", "affiliate link", "affiliate disclosure", "i earn a commission", "commission at no extra cost", "affiliate links"]
+# added: links that show the creator publishes on another platform (single_platform need signal)
+other_platform_domains: [spotify.com, podcasts.apple.com, music.amazon.com, overcast.fm, pocketcasts.com, substack.com, beehiiv.com, convertkit.com, kit.com, mailchimp.com, ghost.io, medium.com, tiktok.com, instagram.com, youtube.com, linkedin.com, x.com, twitter.com]
+other_platform_paths: ["/blog", "/newsletter", "/podcast", "/articles", "/posts"]

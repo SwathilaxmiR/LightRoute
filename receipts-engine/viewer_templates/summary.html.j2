@@ -1,0 +1,26 @@
+{% extends "_base.html.j2" %}
+{% block title %}Summary{% endblock %}
+{% block body %}
+<h1>Summary</h1>
+<div class="kpis">
+<div class="kpi"><span class="muted">Exported leads</span><b>{{ rows|length }}</b></div>
+<div class="kpi"><span class="muted">Priority A</span><b>{{ prio.get('A', 0) }}</b></div>
+<div class="kpi"><span class="muted">Countries</span><b>{{ by_country|length }}</b></div>
+<div class="kpi"><span class="muted">Rejected candidates</span><b>{{ rejected }}</b></div>
+</div>
+<h2>By segment</h2>
+<div class="wrap"><table><tr><th>Segment</th><th>Leads</th><th>Share</th></tr>{% for k, v in by_segment.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td><td>{{ '%.0f'|format(100 * v / rows|length) }}%</td></tr>{% endfor %}</table></div>
+<h2>By country</h2>
+<div class="wrap"><table><tr><th>Country</th><th>Leads</th><th>Share</th></tr>{% for k, v in by_country.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td><td>{{ '%.0f'|format(100 * v / rows|length) }}%</td></tr>{% endfor %}</table></div>
+<h2>Balance rules</h2>
+<div class="card">{% if balance.violations %}{% for v in balance.violations %}<div class="fail">{{ v }}</div>{% endfor %}{% else %}<span class="pass">All quota rules pass.</span>{% endif %}</div>
+<h2>Best-channel mix</h2>
+<div class="wrap"><table><tr><th>Channel</th><th>Leads</th></tr>{% for k, v in channel_mix.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</table></div>
+<h2>Top reject reasons</h2>
+<div class="wrap"><table><tr><th>Reason</th><th>Count</th></tr>{% for k, v in reasons %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</table></div>
+<h2>Latest audit</h2>
+<div class="card">{% if audit %}pass rate {{ '%.0f'|format(100 * audit.pass_rate) }}% on {{ audit.n }} leads (seed {{ audit.seed }}, {{ audit.generated_at }}){% else %}<span class="muted">No audit run yet. Run <code>receipts audit</code>.</span>{% endif %}</div>
+<h2>Run ledger</h2>
+<div class="wrap"><table><tr><th>Run</th><th>Kind</th><th>Started</th><th>Status</th><th>Input</th><th>Produced</th><th>Rejected</th><th>Dupes</th><th>Unchanged</th><th>YouTube units</th><th>LLM $</th></tr>
+{% for r in runs %}<tr><td>{{ r.run_id }}</td><td>{{ r.kind }}</td><td>{{ r.started[:16] }}</td><td>{{ r.status }}</td><td>{{ r.input_size }}</td><td>{{ r.produced }}</td><td>{{ r.rejected }}</td><td>{{ r.dupes_removed }}</td><td>{{ r.unchanged }}</td><td>{{ r.youtube_units }}</td><td>{{ '%.4f'|format(r.llm_cost_usd or 0) }}</td></tr>{% endfor %}</table></div>
+{% endblock %}

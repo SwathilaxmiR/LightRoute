@@ -1,0 +1,175 @@
+project:
+  user_agent: "ReceiptsEngine/1.0 (assessment research; contact: TODO_EMAIL)"
+  timezone: "UTC"
+
+sender:                      # shown in every message; G4 blocks export while TODO remains
+  name: "TODO"
+  role: "independent growth researcher (assessment sample, not an IncuBrix employee)"
+  postal_address: "TODO"
+  reply_to: "TODO"
+
+offer_line: "TODO"           # one true sentence on what IncuBrix does, written after using the product
+
+http:
+  max_concurrency: 8
+  per_host_delay_s: 1.0
+  timeout_s: 20
+  retries: 4
+  backoff_base_s: 1.5
+  circuit_breaker_failures: 5
+  cache_hours: 24                      # reuse a snapshot of the same URL fetched within this window
+
+quota:
+  youtube_daily_units: 10000          # verify in current API docs
+  youtube_stop_at_fraction: 0.90
+  youtube_cost:                        # verify; units per call
+    search_list: 100
+    channels_list: 1
+    playlist_items_list: 1
+    videos_list: 1
+    comment_threads_list: 1
+
+thresholds:
+  active_count_30d: 8
+  active_longform_60d: 2
+  longform_min_seconds: 480
+  short_max_seconds: 60
+  window_days_short: 30
+  window_days_long: 60
+  language_items: 5
+  language_min_english: 4
+  need_min_signals: 2
+  need_min_strong: 1
+  cadence_gap_multiple: 2.0
+  backlog_min_items: 100
+  caption_missing_fraction: 0.5
+  caption_sample_size: 5
+  fit_followers_min: 5000
+  fit_followers_max: 500000
+  max_followers_hard: 5000000         # above this, treat as brand-scale and reject
+  podcast_min_episodes: 8
+  podcast_min_median_minutes: 15
+  reupload_duration_tolerance_s: 2     # same title within this many seconds = re-upload, counted once
+
+freshness:
+  max_evidence_age_days: 30
+  ttl_refresh_days: 14
+  final_recheck: true
+
+quotas_final:                         # applied at selection time
+  max_country_share: 0.55
+  min_countries: 3
+  min_country_share_each: 0.03
+  segment_targets: {youtuber: 0.35, podcaster: 0.35, expert_led: 0.30}
+  segment_tolerance: 0.10
+
+priority:
+  target_count: 25                    # raise to 250 for the exceptional tier
+  require_manual_check_for: [linkedin, instagram, x]
+
+scoring:
+  weights: {need: 30, commercial: 20, activity: 15, reachability: 15, fit_size: 10, freshness: 10}
+  need_strong_points: 12
+  need_medium_points: 6
+
+llm:
+  provider: anthropic
+  model: "claude-haiku-5-5"           # verify model string availability
+  max_tokens: 600
+  temperature: 0
+  cache: true
+  usd_per_mtok_in: 0.10               # claude-haiku-5-5, prompts <=100K tokens (verify; docs/assumptions.md #12)
+  usd_per_mtok_out: 0.50
+  max_rewrite_attempts: 2
+
+message_limits:
+  email_words_first: 120
+  email_words_followup: 80
+  email_words_close: 60
+  linkedin_chars_first: 300
+  form_words_first: 100
+
+follow_up_days: [0, 4, 9]
+
+seed_test:
+  allowed_recipients: ["TODO_TEST_ADDRESS_1", "TODO_TEST_ADDRESS_2"]
+  tracker_base_url: "http://localhost:8000"
+  daily_caps: {email: 20, form: 20, linkedin: 20}
+  time_compression_factor: 1440        # 1 day = 1 minute in tests
+
+bench:
+  rows: 5000
+  db_path: "out/bench/state.db"
+
+# ---------------------------------------------------------------------------
+# Added during build: knobs referenced elsewhere in BUILD_SPEC.md that section
+# 5.2 did not list. Kept here so no tunable lives in Python (rule 0.5).
+# ---------------------------------------------------------------------------
+paths:
+  db: "state.db"
+  out_dir: "out"
+  snapshots_dir: "out/snapshots"
+  fixtures_dir: "tests/fixtures"
+
+workbook:
+  path: ""                             # e.g. input/IncuBrix_..._Submission_Workbook.xlsx
+  yellow_rgbs: ["FFFFFF00", "FFFFFFCC", "FFFFF2CC", "FFFFEB9C", "FFFFFF99"]
+  yellow_other: []                     # theme/indexed fills seen in the real workbook, e.g. "theme:7:tint:0.8" (mismatch errors print them)
+  rows_max: 1000
+
+discovery:
+  snowball_depth: 1
+  podcast_max_age_days: 60
+  podcast_language_prefix: "en"
+
+text:
+  quote_min_chars: 12
+  lang_min_confidence: 0.1             # lingua top confidence floor (spread over ~75 languages)
+  lang_min_letters: 10                 # shorter texts are 'und'
+
+identity:
+  fuzzy_review_ratio: 92               # >= this writes to review_possible_dupes.csv, never merges
+  handle_name_match_ratio: 85
+
+evidence:
+  sponsorship_window_days: 90
+  backlog_old_item_days: 90
+  cadence_window_days: 90
+  cadence_compare_days: 45
+  captions_gap_strength: strong        # set to "medium" if assumptions.md shows auto captions count as true
+  shorts_conservative_max_seconds: 180 # no_shortform: any item this short in 60d counts as a possible Short (Shorts may run to 3 min)
+  team_workflow_pattern: 'edited by|editor:|producer:|produced by|hiring.{0,40}editor|video editor wanted'
+
+channels:
+  business_words: ["business", "inquiries", "enquiries", "sponsor", "partnership", "collab", "booking", "work with", "contact", "press", "advertis", "guest"]
+  weight_business_language: 3
+  weight_creator_owned: 2
+  weight_automatable: 1
+  responsiveness_cap: 3
+  reply_rate_plus1: 0.3
+  reply_rate_plus2: 0.5
+  active_window_days: 60
+  assisted_types: [linkedin, instagram, x, form]
+
+fit_size:
+  taper_floor: 0.3
+  unknown_value: 0.5
+
+priority_split:
+  b_fraction: 0.40
+  min_proof_receipts: 3
+
+outreach:
+  opt_out_line: "If this is not relevant, reply STOP and I will not write again."
+  linkedin_opt_out: "Not relevant? Say so and I will not follow up."
+  hook_max_words: 35
+  hook_recent_days: 30
+
+audit:
+  metric_tolerance: 0.10               # metrics may drift by this fraction on live re-fetch
+
+segment:
+  expert_min_items_60d: 4              # "content is published regularly" for the expert_led rule
+
+pipeline:
+  candidate_concurrency: 4             # candidates collected in parallel

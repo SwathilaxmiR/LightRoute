@@ -1,0 +1,116 @@
+{% extends "base.html" %}{% set active = "leads" %}
+{% block title %}{{ lead.lead_id }} {{ row.creator_name }} · Receipts console{% endblock %}
+{% macro receipt(e) %}
+<div class="entry">
+  {% if e.sub_key %}<strong>{{ e.sub_key|replace('_', ' ') }}</strong>{% endif %}
+  {% if e.result and e.result != 'pass' %} <span class="badge b-fail">{{ e.result }}{% if e.reason_code %} · {{ e.reason_code }}{% endif %}</span>{% endif %}
+  {% if e.quote_or_metric %}<div class="quote">{{ e.quote_or_metric }}</div>{% endif %}
+  <div class="meta">
+    {% if e.evidence_url %}<a class="url" href="{{ e.evidence_url }}" target="_blank" rel="noopener noreferrer">{{ e.evidence_url }}</a>{% endif %}
+    {% if e.snap_id %}<a href="/snapshots/{{ e.snap_id }}?q={{ (e.quote_or_metric or '')|urlencode }}">view snapshot</a>{% endif %}
+    <span>checked {{ e.checked_at|ts }}</span><span>{{ e.verified_by }}</span>
+    {% if e.data_origin and e.data_origin != 'live' %}<span class="badge b-warn">{{ e.data_origin }}</span>{% endif %}
+  </div>
+</div>
+{% endmacro %}
+{% block body %}
+<div class="lead-head">
+  <div>
+    <div class="muted" style="font-size:13px"><a href="/leads">Leads</a> / {{ lead.lead_id }}{% if prev %} · <a href="/leads/{{ prev }}">← {{ prev }}</a>{% endif %}{% if nxt %} · <a href="/leads/{{ nxt }}">{{ nxt }} →</a>{% endif %}</div>
+    <h1>{{ row.creator_name }}</h1>
+    <div class="tags">
+      <span class="badge b-neutral">{{ row.creator_segment }}</span><span class="badge b-neutral">{{ row.country_iso2 }}</span>
+      <span class="badge b-neutral">{{ row.primary_platform }}</span>
+      <span class="badge {{ 'b-A' if lead.priority == 'A' else 'b-neutral' }}">Priority {{ lead.priority }}</span>
+      <span class="badge {{ 'b-pass' if lead.status == 'Qualified' else 'b-fail' if lead.status == 'Rejected' else 'b-neutral' }}">{{ lead.status }}</span>
+      <a class="badge b-neutral" href="{{ row.profile_url }}" target="_blank" rel="noopener noreferrer">profile ↗</a>
+    </div>
+    <div class="muted mono" style="margin-top:6px">{{ lead.creator_key }} · {{ row.stable_creator_id }} · followers {{ row.followers_or_subscribers }}</div>
+  </div>
+  <div style="text-align:right"><div class="score">{{ '%.1f'|format(lead.score) }}</div><div class="muted">lead score</div></div>
+</div>
+
+<div class="layout">
+  <section class="stack">
+    {% for c in cards %}
+    <div class="card check {{ c.result }}">
+      <div class="check-head"><h3>{{ loop.index }}. {{ c.title }}</h3>
+        <span class="badge {{ 'b-pass' if c.result == 'pass' else 'b-fail' }}">{{ c.result|upper }}</span></div>
+      {% if c.summary %}<div class="meta" style="margin-bottom:6px">{{ c.summary }}</div>{% endif %}
+      {% for e in c.entries if c.name not in ('commercial', 'needs') or e.result == 'pass' %}{{ receipt(e) }}
+      {% else %}<div class="muted">No passing receipt recorded.</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="card">
+      <h3>Supporting checks</h3>
+      {% for e in extra %}<div class="entry"><strong>{{ e.name }}</strong> <span class="badge {{ 'b-pass' if e.result == 'pass' else 'b-fail' }}">{{ (e.result or 'missing')|upper }}</span>{{ receipt(e) }}</div>{% endfor %}
+    </div>
+
+    <h2>Messages</h2>
+    {% for m in messages %}
+    <div class="card">
+      <div class="check-head"><h3>{{ m.channel|capitalize }} · step {{ m.step }}{% if m.assisted_send %} <span class="badge b-neutral">assisted send</span>{% endif %}</h3>
+        <span><span class="badge {{ 'b-pass' if m.validated else 'b-fail' }}">{{ 'valid' if m.validated else 'invalid' }}</span>
+        <button type="button" data-copy="msg-{{ loop.index }}">Copy</button></span></div>
+      <pre class="msg" id="msg-{{ loop.index }}">{% if m.subject %}Subject: {{ m.subject }}
+
+{% endif %}{{ m.body }}</pre>
+      <div class="meta" style="margin-top:6px">hook source: <a class="url" href="{{ m.hook_source_url }}" target="_blank" rel="noopener noreferrer">{{ m.hook_source_url }}</a></div>
+      {% if m.failed %}<div style="margin-top:6px">{% for f in m.failed %}<span class="badge b-fail" style="margin:0 6px 6px 0">{{ f.rule }}: {{ f.note }}</span>{% endfor %}</div>{% endif %}
+      <details><summary>Validator report ({{ m.report|selectattr('pass')|list|length }}/{{ m.report|length }})</summary>
+        <ul class="list">{% for v in m.report %}<li><span class="badge {{ 'b-pass' if v.pass else 'b-fail' }}">{{ 'ok' if v.pass else 'fail' }}</span><span class="grow">{{ v.rule }}</span><span class="muted">{{ v.note }}</span></li>{% endfor %}</ul>
+      </details>
+    </div>
+    {% else %}<div class="card empty">No messages drafted.</div>{% endfor %}
+  </section>
+
+  <aside class="stack">
+    <div class="card">
+      <h3>Score breakdown</h3>
+      {% for k, v in breakdown.components.items() %}
+      <div class="bar"><span class="name">{{ k|replace('_', ' ') }}</span><span class="track"><span class="fill" style="width:{{ (v * 100)|round(1) }}%"></span></span><span class="num">{{ '%.2f'|format(v) }} × {{ weights[k]|int }}</span></div>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h3>Channels</h3>
+      {% for ch in channels %}
+      <div class="entry">
+        <div><span class="badge {{ 'b-A' if ch.role in ('best', 'backup') else 'b-neutral' }}">{{ ch.role }}</span> <strong>{{ ch.channel_type|chan }}</strong>
+          <span class="badge {{ 'b-pass' if ch.verified else 'b-warn' }}">{{ 'verified' if ch.verified else 'unverified' }}</span></div>
+        <div class="mono url" style="margin-top:4px">{{ ch.handle_or_url }}</div>
+        <div class="quote">{{ ch.source_quote }}</div>
+        <div class="meta"><a class="url" href="{{ ch.source_url }}" target="_blank" rel="noopener noreferrer">source page</a>
+          {% if ch.snap_id %}<a href="/snapshots/{{ ch.snap_id }}?q={{ ch.source_quote|urlencode }}">snapshot</a>{% endif %}
+          <span>business wording {{ 'yes' if ch.business_language else 'no' }}</span><span>name match {{ 'yes' if ch.name_match else 'no' }}</span>
+          {% if ch.channel_type == 'email' %}<span>MX {{ 'ok' if ch.mx_ok else 'missing' }}</span>{% endif %}
+          <span>active {{ ch.last_active or '-' }}{% if ch.active_proof %} ({{ ch.active_proof }}){% endif %}</span><span>score {{ '%.1f'|format(ch.channel_score or 0) }}</span></div>
+        {% if ch.channel_type in ('linkedin', 'instagram', 'x') %}
+        <form class="manual-check" data-lead="{{ lead.lead_id }}" data-channel="{{ ch.channel_type }}">
+          <div class="formrow">
+            <label>Last post date you saw <input type="date" name="active_date" max="{{ today }}" required></label>
+            <label>Screenshot of the profile <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp" required></label>
+            <label>Note (optional) <input type="text" name="note" maxlength="200" placeholder="e.g. posts weekly about pricing"></label>
+            <div><button class="primary" type="submit">{{ 'Update manual check' if ch.manual_check_path else 'Record manual check' }}</button></div>
+            <div class="toast"></div>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+      {% else %}<div class="muted">No contact routes found on creator-owned pages.</div>{% endfor %}
+    </div>
+
+    <div class="card">
+      <h3>Identities</h3>
+      <ul class="list">{% for i in identities %}<li><span class="badge b-neutral">{{ i.platform }}</span><span class="grow mono url">{% if i.url %}<a href="{{ i.url }}" target="_blank" rel="noopener noreferrer">{{ i.platform_id }}</a>{% else %}{{ i.platform_id }}{% endif %}</span></li>{% endfor %}</ul>
+    </div>
+
+    <div class="card">
+      <h3>Recent items</h3>
+      <ul class="list">{% for it in items %}<li><span class="grow"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer">{{ it.title or it.item_id }}</a>
+        <div class="meta"><span>{{ it.published_at[:10] }}</span>{% if it.duration_s %}<span>{{ (it.duration_s / 60)|round|int }} min</span>{% endif %}
+        {% if it.has_captions == 0 %}<span>no captions</span>{% endif %}{% if it.paid_placement %}<span>paid placement</span>{% endif %}</div></span></li>{% endfor %}</ul>
+    </div>
+  </aside>
+</div>
+{% endblock %}

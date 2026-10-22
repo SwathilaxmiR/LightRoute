@@ -1,0 +1,34 @@
+{% extends "_base.html.j2" %}
+{% block title %}Leads{% endblock %}
+{% block body %}
+<h1>Leads</h1>
+<p class="muted">{{ rows|length }} exported leads. Click a lead for its seven receipts.</p>
+<div class="controls">
+  <input id="q" type="search" placeholder="Search name, hook, channel" aria-label="Search">
+  <select id="seg" aria-label="Segment"><option value="">All segments</option>{% for v in segments %}<option>{{ v }}</option>{% endfor %}</select>
+  <select id="cty" aria-label="Country"><option value="">All countries</option>{% for v in countries %}<option>{{ v }}</option>{% endfor %}</select>
+  <select id="pri" aria-label="Priority"><option value="">All priorities</option><option>A</option><option>B</option><option>C</option></select>
+</div>
+<div class="wrap"><table id="t">
+<thead><tr><th>Lead</th><th>Creator</th><th>Segment</th><th>Country</th><th>Platform</th><th>Priority</th><th>Score</th><th>Best channel</th><th>Need</th></tr></thead>
+<tbody>
+{% for r in rows %}<tr data-seg="{{ r.creator_segment }}" data-cty="{{ r.country_iso2 }}" data-pri="{{ r.priority }}">
+<td><a href="lead/{{ r.lead_id }}.html">{{ r.lead_id }}</a></td><td>{{ r.creator_name }}</td><td>{{ r.creator_segment }}</td>
+<td>{{ r.country_iso2 }}</td><td>{{ r.primary_platform }}</td><td>{{ r.priority }}</td><td>{{ r.lead_score }}</td>
+<td>{{ r.best_channel }}</td><td>{{ r.incubrix_need }}</td></tr>{% endfor %}
+</tbody></table></div>
+<script>
+(function(){
+  var q=document.getElementById('q'), seg=document.getElementById('seg'), cty=document.getElementById('cty'), pri=document.getElementById('pri');
+  function apply(){
+    var t=q.value.toLowerCase();
+    document.querySelectorAll('#t tbody tr').forEach(function(tr){
+      var ok=(!t||tr.textContent.toLowerCase().indexOf(t)>=0)&&(!seg.value||tr.dataset.seg===seg.value)
+        &&(!cty.value||tr.dataset.cty===cty.value)&&(!pri.value||tr.dataset.pri===pri.value);
+      tr.style.display=ok?'':'none';
+    });
+  }
+  [q,seg,cty,pri].forEach(function(el){el.addEventListener('input',apply);});
+})();
+</script>
+{% endblock %}

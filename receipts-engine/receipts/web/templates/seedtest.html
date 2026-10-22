@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% set active = "seed" %}
+{% block title %}Seed test · Receipts console{% endblock %}
+{% block body %}
+<h1>Seed test</h1>
+<p class="sub">Five synthetic test leads, sent only to accounts you own (G2). LinkedIn is sent by hand (G7). Schedule with <code>receipts seed-test --all</code>, then advance with <code>receipts seed-test --tick</code>.</p>
+<div class="grid kpis">
+  <div class="card kpi"><div class="label">Scheduled</div><div class="value">{{ sched|length }}</div></div>
+  <div class="card kpi"><div class="label">Sent</div><div class="value">{{ sched|selectattr('status', 'equalto', 'sent')|list|length }}</div></div>
+  <div class="card kpi"><div class="label">Waiting for you</div><div class="value">{{ sched|selectattr('status', 'equalto', 'queued_for_human')|list|length }}</div></div>
+  <div class="card kpi"><div class="label">Clicks</div><div class="value">{{ clicks }}</div></div>
+  <div class="card kpi"><div class="label">Replies</div><div class="value">{{ replies|length }}</div></div>
+</div>
+<div class="grid two" style="margin-top:12px">
+  <div class="card">
+    <h2 style="margin-top:0">Still needed</h2>
+    <ul class="list">{% for ch, m in missing.items() %}<li><span class="badge {{ 'b-pass' if not m else 'b-warn' }}">{{ ch }}</span><span class="grow muted">{{ m|join(', ') if m else 'ready' }}</span></li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Log an assisted send or reply</h2>
+    <form class="seed-log" data-action="sent"><div class="formrow">
+      <label>Sent by hand <span style="display:flex;flex-wrap:wrap;gap:6px"><select name="lead_id">{% for l in leads %}<option>{{ l }}</option>{% endfor %}</select>
+      <select name="channel">{% for c in channels %}<option {{ 'selected' if c == 'linkedin' }}>{{ c }}</option>{% endfor %}</select>
+      <select name="step"><option>1</option><option>2</option><option>3</option></select><button type="submit">Mark sent</button></span></label>
+      <div class="toast"></div></div></form>
+    <form class="seed-log" data-action="reply"><div class="formrow">
+      <label>Reply received <span style="display:flex;flex-wrap:wrap;gap:6px"><select name="lead_id">{% for l in leads %}<option>{{ l }}</option>{% endfor %}</select>
+      <select name="channel">{% for c in channels %}<option {{ 'selected' if c == 'linkedin' }}>{{ c }}</option>{% endfor %}</select>
+      <select name="label">{% for v in ['positive', 'negative', 'stop', 'auto_reply', 'other'] %}<option>{{ v }}</option>{% endfor %}</select><button type="submit">Log reply</button></span></label>
+      <div class="toast"></div></div></form>
+  </div>
+</div>
+<h2>Schedule</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Lead</th><th>Channel</th><th class="num">Step</th><th>Due (UTC)</th><th>Status</th><th>Sent</th><th>Recipient</th><th>Token</th></tr></thead>
+<tbody>{% for r in sched %}<tr><td>{{ r.lead_id }}</td><td>{{ r.channel }}</td><td class="num">{{ r.step }}</td><td>{{ r.due_at|ts }}</td>
+<td><span class="badge {{ 'b-pass' if r.status == 'sent' else 'b-warn' if r.status == 'queued_for_human' else 'b-fail' if r.status in ('failed', 'cancelled') else 'b-neutral' }}">{{ r.status }}</span></td>
+<td>{{ r.sent_at|ts }}</td><td class="mono">{{ r.recipient }}</td><td class="mono">{{ r.token }}</td></tr>
+{% else %}<tr><td colspan="8" class="empty">Nothing scheduled yet.</td></tr>{% endfor %}</tbody></table></div>
+<h2>Replies and suppressions</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Lead</th><th>Channel</th><th>Label</th><th>Received</th><th>Source</th><th>Excerpt</th></tr></thead>
+<tbody>{% for r in replies %}<tr><td>{{ r.lead_id }}</td><td>{{ r.channel }}</td><td><span class="badge {{ 'b-pass' if r.label == 'positive' else 'b-fail' if r.label in ('stop', 'negative') else 'b-neutral' }}">{{ r.label }}</span></td><td>{{ r.received_at|ts }}</td><td>{{ r.source }}</td><td class="muted">{{ r.excerpt }}</td></tr>
+{% else %}<tr><td colspan="6" class="empty">No replies yet.</td></tr>{% endfor %}</tbody></table></div>
+{% if supp %}<p class="muted">Suppressed: {% for x in supp %}{{ x.lead_id }} ({{ x.reason }}){{ ', ' if not loop.last }}{% endfor %}</p>{% endif %}
+{% endblock %}

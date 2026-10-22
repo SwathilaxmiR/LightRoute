@@ -1,0 +1,5 @@
+niches: [business, marketing, entrepreneurship, personal finance education, fitness coaching, nutrition education, career coaching, productivity, tech tutorials, software development education, design education, creator economy, language learning, parenting education, relationship coaching, mental wellbeing education, real estate education, sales training, leadership coaching, public speaking]
+intents: [podcast, interview, course, coaching, masterclass, newsletter, tutorial, workshop]
+podcast_categories: [Business, Education, Health & Fitness, Technology, Self-Improvement, Marketing, Entrepreneurship, Careers]
+youtube_search_templates: ["{niche} {intent}", "{niche} podcast episode", "{niche} coach"]
+max_results_per_query: 50

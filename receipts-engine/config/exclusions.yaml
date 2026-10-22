@@ -1,0 +1,21 @@
+name_or_description_keywords:       # agency, management, brand, publication, directory, fan, network
+  - "agency"
+  - "management company"
+  - "talent management"
+  - "marketing agency"
+  - "production company"
+  - "media network"
+  - "podcast network"
+  - "directory"
+  - "fan page"
+  - "fan account"
+  - "news"
+  - "magazine"
+  - "official channel of"
+  - "we help brands"
+  - "our clients"
+domains_blocklist:
+  - "linktr.ee"
+  - "beacons.ai"
+  - "bit.ly"
+shared_hosts: ["youtube.com", "youtu.be", "spotify.com", "apple.com", "podcasts.apple.com", "substack.com", "medium.com", "linkedin.com", "instagram.com", "x.com", "twitter.com", "facebook.com", "tiktok.com", "patreon.com", "linktr.ee", "wordpress.com", "blogspot.com", "wixsite.com", "squarespace.com"]

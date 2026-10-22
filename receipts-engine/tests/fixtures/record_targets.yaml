@@ -1,0 +1,9 @@
+# Human-chosen REAL public creators to record once as replay fixtures (BUILD_SPEC M2, section 16 item 6).
+# Pick creators you would plausibly target. Replace every TODO, then run:
+#   .venv/bin/python scripts/record_fixtures.py
+# youtube: channel ids (UC...), @handles, or channel URLs
+# podcast: Podcast Index feed ids (numbers; find them on podcastindex.org)
+# website: creator-owned homepages (not linktr.ee, substack.com etc.)
+youtube: ["TODO", "TODO", "TODO"]
+podcast: ["TODO", "TODO", "TODO"]
+website: ["TODO", "TODO", "TODO"]

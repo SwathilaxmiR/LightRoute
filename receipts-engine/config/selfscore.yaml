@@ -1,0 +1,7 @@
+# Human-authored, honest self-scores. 04_SELF_CHECK rows 24-28: score -> C, reason -> E.
+scores:
+  24: {score: "TODO", reason: "TODO"}
+  25: {score: "TODO", reason: "TODO"}
+  26: {score: "TODO", reason: "TODO"}
+  27: {score: "TODO", reason: "TODO"}
+  28: {score: "TODO", reason: "TODO"}

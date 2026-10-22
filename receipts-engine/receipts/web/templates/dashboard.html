@@ -1,0 +1,64 @@
+{% extends "base.html" %}{% set active = "dash" %}
+{% block title %}Dashboard · Receipts console{% endblock %}
+{% block body %}
+<h1>Dashboard</h1>
+<p class="sub">Acceptance rules and what is still needed before a real export. Real (live) data only.</p>
+{% if not st.qualified and not candidates %}<div class="card" style="margin-bottom:12px"><strong>No real data yet.</strong>
+<span class="muted">Add your API keys to <code>.env</code>, then run <code>make run</code>. Demo runs (<code>make demo</code>) never appear here.</span></div>{% endif %}
+
+<div class="grid kpis">
+  <div class="card kpi"><div class="label">Qualified, selected</div><div class="value">{{ st.qualified }}</div><div class="hint">target 1,000</div></div>
+  <div class="card kpi"><div class="label">Priority A ready</div><div class="value">{{ st.priority_a_full }}</div><div class="hint">3 validated messages</div></div>
+  <div class="card kpi"><div class="label">Reserve</div><div class="value">{{ st.reserve }}</div><div class="hint">held back by quotas</div></div>
+  <div class="card kpi"><div class="label">Rejected</div><div class="value">{{ st.rejected }}</div><div class="hint">of {{ candidates }} candidates</div></div>
+  <div class="card kpi"><div class="label">Messages validated</div><div class="value">{{ st.messages_validated }}<span class="muted" style="font-size:15px">/{{ st.messages_total }}</span></div><div class="hint">re-rendered on export</div></div>
+</div>
+
+<div class="grid two" style="margin-top:12px">
+  <div class="card">
+    <h2 style="margin-top:0">Acceptance rules</h2>
+    <ul class="list">
+      {% for r in st.rules %}
+      <li><span class="badge {{ 'b-pass' if r.ok else 'b-fail' }}">{{ 'Pass' if r.ok else 'Fail' }}</span>
+        <span class="grow">{{ r.code }} · {{ r.desc }}</span><span class="mono">{{ r.value }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Ready for a real run?</h2>
+    <ul class="list">
+      {% for i in readiness %}
+      <li><span class="badge {{ 'b-pass' if i.ok else 'b-warn' }}">{{ 'Done' if i.ok else 'To do' }}</span>
+        <span class="grow">{{ i.label }}{% if i.detail %}<span class="meta mono" style="display:block">{{ i.detail }}</span>{% endif %}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="grid two" style="margin-top:12px">
+  <div class="card">
+    <h2 style="margin-top:0">Countries <span class="muted" style="font-weight:400">· cap {{ max_share|pct }} each</span></h2>
+    {% for k, v, share in countries %}
+    <div class="bar"><span class="name">{{ k }}</span><span class="track"><span class="fill {{ 'over' if share > max_share }}" style="width:{{ (share * 100)|round(1) }}%"></span></span><span class="num">{{ v }} · {{ share|pct }}</span></div>
+    {% else %}<div class="empty">No qualified leads yet.</div>{% endfor %}
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Segments <span class="muted" style="font-weight:400">· target ±{{ tolerance|pct }}</span></h2>
+    {% for k, v, share, target in segments %}
+    <div class="bar"><span class="name">{{ k|seg }}</span><span class="track"><span class="fill {{ 'over' if (share - target)|abs > tolerance }}" style="width:{{ (share * 100)|round(1) }}%"></span></span><span class="num">{{ v }} · {{ share|pct }} / {{ target|pct }}</span></div>
+    {% endfor %}
+    <h2>Best-channel mix</h2>
+    {% for k, v in st.channel_mix.items() %}<span class="badge b-neutral" style="margin:0 6px 6px 0">{{ k|chan }} {{ v }}</span>{% else %}<span class="muted">None yet.</span>{% endfor %}
+  </div>
+</div>
+
+<h2>Recent runs</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Run</th><th>Kind</th><th>Started (UTC)</th><th>Status</th><th class="num">Input</th><th class="num">Produced</th><th class="num">Updated</th><th class="num">Rejected</th><th class="num">Dupes</th><th class="num">YouTube units</th></tr></thead>
+<tbody>
+{% for r in runs %}<tr><td>{{ r.run_id }}</td><td>{{ r.kind }}</td><td>{{ r.started|ts }}</td>
+<td><span class="badge {{ 'b-pass' if r.status == 'ok' else 'b-warn' if r.status == 'partial' else 'b-neutral' }}">{{ r.status }}</span></td>
+<td class="num">{{ r.input_size }}</td><td class="num">{{ r.produced }}</td><td class="num">{{ r.updated }}</td><td class="num">{{ r.rejected }}</td><td class="num">{{ r.dupes_removed }}</td><td class="num">{{ r.youtube_units }}</td></tr>
+{% else %}<tr><td colspan="10" class="empty">No runs yet. Try <code>make demo</code> or <code>receipts run</code>.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

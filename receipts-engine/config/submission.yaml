@@ -1,0 +1,38 @@
+# Human-authored (BUILD_SPEC 9.6 / section 16 item 5). The workbook export refuses to run while any TODO remains.
+# 00_START inputs: keys are the cells beside each label in A5:A18. Open the workbook and fill the matching value.
+start:
+  B5: "TODO"    # candidate id
+  B6: "TODO"    # name
+  B7: "TODO"    # email
+  B8: "TODO"    # college
+  B9: "TODO"    # start time
+  B10: "TODO"   # end time
+  B11: "TODO"   # total hours
+  B12: "TODO"   # repository URL
+  B13: "TODO"   # product walkthrough video URL
+  B14: "TODO"   # technical demo video URL
+  B15: "TODO"   # launch kit URL or file
+  B16: "TODO"   # tools used
+  B17: "TODO"   # money spent
+  B18: "TODO"   # manual work done
+accept_declaration: false   # set true only if you have read and accept the declaration (writes "Yes" to B21)
+# 00_START checklist status F5:F10 -> "Yes" only when the artefact (file path or URL) exists / is non-empty
+checklist:
+  F5: "TODO"
+  F6: "TODO"
+  F7: "TODO"
+  F8: "TODO"
+  F9: "TODO"
+  F10: "TODO"
+# 03_ENGINE_LAUNCH requirement rows 6..14: proof file or URL (Done? = Yes only if it exists) and a note (column H)
+engine_requirements:
+  6: {evidence: "TODO", note: "TODO"}
+  7: {evidence: "TODO", note: "TODO"}
+  8: {evidence: "TODO", note: "TODO"}
+  9: {evidence: "TODO", note: "TODO"}
+  10: {evidence: "TODO", note: "TODO"}
+  11: {evidence: "TODO", note: "TODO"}
+  12: {evidence: "TODO", note: "TODO"}
+  13: {evidence: "TODO", note: "TODO"}
+  14: {evidence: "TODO", note: "TODO"}
+launch_kit_path: "launch_kit.md"

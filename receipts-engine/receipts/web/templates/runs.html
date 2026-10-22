@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% set active = "runs" %}
+{% block title %}Runs & audits · Receipts console{% endblock %}
+{% block body %}
+<h1>Runs &amp; audits</h1>
+<p class="sub">The run ledger, self-audit history and the latest quota balance.</p>
+<div class="grid two">
+  <div class="card">
+    <h2 style="margin-top:0">Self-audits</h2>
+    {% if audits %}
+    <ul class="list">{% for a in audits %}<li>
+      <span class="badge {{ 'b-pass' if a.pass_rate >= 0.95 else 'b-fail' }}">{{ a.pass_rate|pct }}</span>
+      <span class="grow">{{ a.generated_at|ts }} · seed {{ a.seed }} · {{ a.n }} leads · {{ 'live' if a.live else 'stored' }}{{ ' · fixture' if a.fixture_mode }}</span>
+      <span class="muted">channels {{ a.channel_accuracy|pct if a.channel_accuracy is not none else '-' }}</span></li>{% endfor %}</ul>
+    {% set latest = audits[0] %}
+    {% if latest.root_causes %}<h3 style="margin-top:12px">Latest root causes</h3>
+    <ul class="list">{% for k, v in latest.root_causes.items() %}<li><span class="grow">{{ k }}</span><span class="mono">{{ v }}</span></li>{% endfor %}</ul>{% endif %}
+    {% else %}<div class="empty">No audits yet. Run <code>receipts audit --n 20 --seed 7 --channels 20</code>.</div>{% endif %}
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Quota balance <span class="muted" style="font-weight:400">· {{ balance.qualified }} real qualified leads</span></h2>
+    {% if balance.qualified %}
+    {% for r in balance.rules %}<div style="margin-bottom:6px"><span class="badge {{ 'b-pass' if r.ok else 'b-fail' }}">{{ 'Pass' if r.ok else 'Fail' }}</span> {{ r.desc }} <span class="mono">{{ r.value }}</span></div>{% endfor %}
+    <ul class="list" style="margin-top:8px">{% for k, v in balance.countries %}<li><span class="grow">{{ k }}</span><span class="mono">{{ v|pct }}</span></li>{% endfor %}
+    {% for k, v, t in balance.segments %}<li><span class="grow">{{ k|seg }}</span><span class="mono">{{ v|pct }} / target {{ t|pct }} ±{{ tolerance|pct }}</span></li>{% endfor %}</ul>
+    {% else %}<div class="empty">No real leads yet.</div>{% endif %}
+  </div>
+</div>
+</div>
+<h2>Run ledger</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Run</th><th>Kind</th><th>Started (UTC)</th><th>Ended</th><th>Status</th><th class="num">Input</th><th class="num">Produced</th><th class="num">Updated</th><th class="num">Unchanged</th><th class="num">Rejected</th><th class="num">Dupes</th><th class="num">YT units</th><th class="num">LLM $</th><th>Top reasons</th></tr></thead>
+<tbody>
+{% for r in rows %}<tr><td>{{ r.run_id }}</td><td>{{ r.kind }}</td><td>{{ r.started|ts }}</td><td>{{ r.ended|ts }}</td>
+<td><span class="badge {{ 'b-pass' if r.status == 'ok' else 'b-warn' if r.status == 'partial' else 'b-neutral' }}">{{ r.status }}</span></td>
+<td class="num">{{ r.input_size }}</td><td class="num">{{ r.produced }}</td><td class="num">{{ r.updated }}</td><td class="num">{{ r.unchanged }}</td><td class="num">{{ r.rejected }}</td><td class="num">{{ r.dupes_removed }}</td><td class="num">{{ r.youtube_units }}</td><td class="num">{{ '%.4f'|format(r.llm_cost_usd or 0) }}</td>
+<td class="muted">{% for k, v in r.reasons %}{{ k }} {{ v }}{{ ', ' if not loop.last }}{% endfor %}</td></tr>
+{% else %}<tr><td colspan="14" class="empty">No runs yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}
